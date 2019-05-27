@@ -50,6 +50,7 @@ bot.on('message', data => {
 // Response to Data
 function handleMessage(message) {
     var count=0;
+    var repeat=0;
     var name='';
     var company='';
     // counting the number of matches
@@ -62,12 +63,18 @@ function handleMessage(message) {
             company=res[0];
         }
         //console.log(res[0]);
-    }
-    if(count==2){
-        forward(message);
-        store(name, company);
+        if(count==2){
+            if(repeat==0){
+                forward(message);
+                repeat=1;
+            }
+            
+            store(name, company);
+            count=0;
+        }
     }
 }
+
 
 // forward message
 function forward(message) {

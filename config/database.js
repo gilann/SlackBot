@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('postgres', 'postgres', 'soal', {
-    host: 'localhost',
+const sequelize = new Sequelize(process.env.Database, process.env.User, process.env.Password, {
+    host: 'ec2-54-221-212-126.compute-1.amazonaws.com',
     dialect:'postgres',
     operatorsAliases:'false',
     pool:{

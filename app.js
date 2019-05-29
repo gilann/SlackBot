@@ -3,6 +3,7 @@ const express = require('express');
 const db = require('./config/database');
 const app = express();
 const Placedin = require('./models/Placedin');
+require('dotenv').config()
 
 // connection to db
 db.authenticate()
@@ -12,84 +13,86 @@ app.get('/', (req, res)=>{
     res.send("Welcome");
 });
 
-// bot creation
+// bot which will take message from one channel
 const bot = new SlackBot({
-  token: 'xoxb-633944887939-646733098944-DADJy0okQmImacn2M49MnzO1',
+  token:process.env.token1,
   name: 'forward'
 });
 
-// regular expression
-const reg = /[@][a-z]*/ig;
+// bot which will forward message to other channel
+const forwardBot = new SlackBot({
+    token: process.env.token2,
+    name: 'forward'
+  });
+
 
 // Start Handler
 bot.on('start', () => {
-    const params = {
-      icon_emoji: ':smiley:'
-    };
+    // const params = {
+    //   icon_emoji: ':smiley:'
+    // };
   
-    bot.postMessageToChannel(
-      'general',
-      'Get Ready To Laugh With forward',
-      params
-    );
+    // bot.postMessageToChannel(
+    //   'general',
+    //   'Get Ready To Laugh With forward',
+    //   params
+    // );
   });
 
 // Error Handler
 bot.on('error', err => console.log(err));
+
+// Start Handler
+forwardBot.on('start', () => {
+    // const params = {
+    //   icon_emoji: ':smiley:'
+    // };
+  
+    // forwardBot.postMessageToChannel(
+    //   'general',
+    //   'I am ready to forward',
+    //   params
+    // );
+  });
+
+// Error Handler
+forwardBot.on('error', err => console.log(err));
 
 // Message Handler
 bot.on('message', data => {
     if (data.type !== 'message') {
         return;
     }
-        // checking if the message is recieved from particular channel
-    if(data.channel=='CK1GC743G')
-        handleMessage(data.text);
+    // checking if the message is recieved from particular channel
+    if(data.channel=='CK1GC743G') 
+    handleMessage(data.text);
 });
+
 
 // Response to Data
 function handleMessage(message) {
-    var count=0;
-    var repeat=0;
-    var name='';
-    var company='';
-    // counting the number of matches
-    while ( (res=reg.exec(message)) !== null) {
-        count++;
-        if(count==1){
-            name=res[0];
-        }
-        if(count==2){
-            company=res[0];
-        }
-        //console.log(res[0]);
-        if(count==2){
-            if(repeat==0){
-                forward(message);
-                repeat=1;
-            }
-            
-            store(name, company);
-            count=0;
-        }
+    if(message.includes('is now working with')){
+        forward(message);
+        store(message);
     }
 }
-
-
 // forward message
 function forward(message) {
     const params = {
         icon_emoji: ':laughing:'
       };
-    bot.postMessageToChannel('random', `${message}`, params);
+    forwardBot.postMessageToChannel('random', `${message}`, params);
 }
 
 // store data
-function store(name, company) {
-    
+function store(message) {
+    let name = message.substring(0, message.indexOf('is now working with')-1);
+    let company = message.substring(message.lastIndexOf('with')+5, message.lastIndexOf('as'));
+    let position = message.substring(message.lastIndexOf('as')+3, message.length);
     Placedin.create({
-        name:name.substr(1),
-        company:company.substr(1)
+        name:name,
+        company:company,
+        position:position
     })
     .then(console.log("Insertion Successful"))
     .catch(err=>console.log(err));

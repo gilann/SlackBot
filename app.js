@@ -2,7 +2,8 @@ const SlackBot = require('slackbots');
 const express = require('express');
 const db = require('./config/database');
 const app = express();
-const Placedin = require('./models/Placedin');
+const Placement = require('./models/Placement');
+
 require('dotenv').config()
 
 // connection to db
@@ -11,6 +12,9 @@ db.authenticate()
    .catch(err=>console.log("Error connecting to db"+err));
 app.get('/', (req, res)=>{
     res.send("Welcome");
+});
+app.post('/', (req, res)=>{
+  res.json("Welcome");
 });
 
 // bot which will take message from one channel
@@ -22,7 +26,7 @@ const bot = new SlackBot({
 // bot which will forward message to other channel
 const forwardBot = new SlackBot({
     token: process.env.token2,
-    name: 'forward'
+    name: process.env.app_name
   });
 
 
@@ -32,10 +36,11 @@ bot.on('start', () => {
     //   icon_emoji: ':smiley:'
     // };
   
-    // bot.postMessageToChannel(
+    // bot.postMessage(
     //   'general',
     //   'Get Ready To Laugh With forward',
     //   params
+    
     // );
   });
 
@@ -45,12 +50,12 @@ bot.on('error', err => console.log(err));
 // Start Handler
 forwardBot.on('start', () => {
     // const params = {
-    //   icon_emoji: ':smiley:'
+    //   icon_emoji: ':sparkles:'
     // };
   
-    // forwardBot.postMessageToChannel(
+    // forwardBot.postMessage(
     //   'general',
-    //   'I am ready to forward',
+    //   "selected",
     //   params
     // );
   });
@@ -64,7 +69,7 @@ bot.on('message', data => {
         return;
     }
     // checking if the message is recieved from particular channel
-    if(data.channel=='CK1GC743G') 
+    if(data.channel==process.env.track_channel) 
     handleMessage(data.text);
 });
 
@@ -79,9 +84,9 @@ function handleMessage(message) {
 // forward message
 function forward(message) {
     const params = {
-        icon_emoji: ':laughing:'
+        icon_emoji: ':sparkles:'
       };
-    forwardBot.postMessageToChannel('random', `${message}`, params);
+    forwardBot.postMessageToChannel(process.env.receiving_channel, `${message}`, params);
 }
 
 // store data
@@ -89,7 +94,7 @@ function store(message) {
     let name = message.substring(0, message.indexOf('is now working with')-1);
     let company = message.substring(message.lastIndexOf('with')+5, message.lastIndexOf('as'));
     let position = message.substring(message.lastIndexOf('as')+3, message.length);
-    Placedin.create({
+    Placement.create({
         name:name,
         company:company,
         position:position
@@ -99,9 +104,7 @@ function store(message) {
 }
 
 
-app.use('/placedin', require('./routes/placedin'));
+app.use('/placement', require('./routes/placement'));
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, console.log(`Server is running on ${PORT}`));
-
-

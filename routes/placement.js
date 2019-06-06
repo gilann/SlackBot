@@ -6,8 +6,6 @@ const router = express.Router();
 
 const Placement = require('../models/Placement');
 
-
-
 router.get('/', (req, res)=>{
     Placement.findAll()
     .then(questions=>{
@@ -17,22 +15,6 @@ router.get('/', (req, res)=>{
     .catch(err=>{
         console.log(err);
     })
-});
-
-router.get('/addPlacement', (req, res)=>{
-    const data = {
-        name:"Shivam",
-        company: "SOAL",
-       
-    };
-    let {name, company} = data;
-    Placedin.create({
-        name,
-        company
-    })
-    .then(placedin=>res.redirect('/placement'))
-    .catch(err=>console.log(err));
-
 });
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const db = require('../config/database');
 
-var Placedin = db.define('placedin', {
+var Placement = db.define('placement', {
     name: {
       type: Sequelize.STRING,
       allowNull: false
@@ -10,10 +10,14 @@ var Placedin = db.define('placedin', {
       type: Sequelize.STRING,
       allowNull: false
     },
+    position: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
   });
 
-  Placedin.sync({ force: false }).then(function() {
+  Placement.sync({ force: false }).then(function() {
     return true;
 });
 
-module.exports = Placedin;
+module.exports = Placement;
